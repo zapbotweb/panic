@@ -6,120 +6,73 @@
   <title>Location Panic Button</title>
   <script>
     async function sendPanicAlert() {
-      const rawFileUrl = "https://raw.githubusercontent.com/zapbotweb/panic/main/latest";  
       try {
-        const response = await fetch(rawFileUrl);
-        const fileContent = await response.text();
+        // Get the user's current location
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const userLatitude = position.coords.latitude;
+          const userLongitude = position.coords.longitude;
 
-        const webhookUrl = "https://discord.com/api/webhooks/1333064545509576786/NdbQKRH4x0syqqdJNuVRIcVEb0jM-lNBimBmHL1gn0gK7hgVHz3SHFRfTS9FQrFvHSl-";
-        
-        const payload = {
-          content: fileContent.trim()  // Send only the coordinates from the GitHub file
-        };
+          const webhookUrl = "https://discord.com/api/webhooks/1333064545509576786/NdbQKRH4x0syqqdJNuVRIcVEb0jM-lNBimBmHL1gn0gK7hgVHz3SHFRfTS9FQrFvHSl-";
+          
+          const payload = {
+            content: `${userLatitude}, ${userLongitude}`  // Send the current coordinates
+          };
 
-        const postResponse = await fetch(webhookUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
+          const postResponse = await fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (postResponse.ok) {
+            alert(`Panic button successfully deployed: ${userLatitude}, ${userLongitude}`);  // Show coordinates in the alert
+          } else {
+            alert("Failed to send panic alert. Please try again.");
+          }
+        }, (error) => {
+          alert("Error retrieving location: " + error.message);
         });
-
-        if (postResponse.ok) {
-          alert(fileContent.trim());  // Show only the coordinates in the alert
-        } else {
-          alert("Failed to send panic alert. Please try again.");
-        }
       } catch (error) {
         alert("Error sending panic alert: " + error.message);
       }
     }
-
-    async function updateMapLink() {
-      const rawFileUrl = "https://raw.githubusercontent.com/zapbotweb/panic/main/latest";  
-      try {
-        const response = await fetch(rawFileUrl);
-        const fileContent = await response.text();
-
-        const coords = fileContent.trim().split(',');
-        let mapsLink = "https://www.google.com/maps"; 
-
-        if (coords.length === 2) {
-          const destLatitude = coords[0].trim();
-          const destLongitude = coords[1].trim();
-
-          navigator.geolocation.getCurrentPosition((position) => {
-            const userLatitude = position.coords.latitude;
-            const userLongitude = position.coords.longitude;
-
-            mapsLink = `https://www.google.com/maps/dir/?api=1&origin=${userLatitude},${userLongitude}&destination=${destLatitude},${destLongitude}`;
-            
-            const mapLinkElement = document.getElementById("mapLink");
-            mapLinkElement.innerHTML = `<a href="${mapsLink}" target="_blank" style="font-size: 24px; color: blue; text-decoration: underline;">Click here for directions to the location on Google Maps</a>`;
-            mapLinkElement.style.display = "block";  
-          });
-        } else {
-          const mapLinkElement = document.getElementById("mapLink");
-          mapLinkElement.innerHTML = `<a href="${mapsLink}" target="_blank" style="font-size: 24px; color: blue; text-decoration: underline;">Click here for general directions on Google Maps</a>`;
-          mapLinkElement.style.display = "block";  
-        }
-      } catch (error) {
-        const mapLinkElement = document.getElementById("mapLink");
-        mapLinkElement.innerHTML = `<a href="https://www.google.com/maps" target="_blank" style="font-size: 24px; color: blue; text-decoration: underline;">Click here for general directions on Google Maps</a>`;
-        mapLinkElement.style.display = "block";  
-      }
-    }
-
-    window.onload = function() {
-      updateMapLink();
-    };
   </script>
   <style>
     body {
       background-color: rgb(77, 36, 36);
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
       margin: 0;
     }
-    #mapLink {
-      margin-top: 20px;
-      display: block;
-      text-align: center;
-    }
-    #mapsLink {
-      font-size: 24px;
-      color: blue;
-      text-decoration: underline;
-      margin-top: 20px;
-      text-align: center;
-    }
-    h1 {
-      text-align: center;
-    }
-    p {
-      text-align: center;
-    }
     button {
-      padding: 20px 40px;
-      font-size: 20px;
+      width: 400px; /* Increased width */
+      height: 400px; /* Increased height */
+      border-radius: 50%; /* Circular shape */
       background-color: red;
       color: white;
-      border: none;
-      border-radius: 5px;
+      border: 12px solid #770000; /* Thick border for radio-like look */
+      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.5); /* Deeper shadow for emphasis */
+      font-size: 36px; /* Larger font size */
+      font-weight: bold;
       cursor: pointer;
-      margin-top: 20px;
+      text-align: center;
+      line-height: 400px; /* Center text vertically */
+      transition: transform 0.2s, box-shadow 0.2s; /* Smooth hover and press effects */
+    }
+    button:hover {
+      background-color: darkred;
+    }
+    button:active {
+      transform: scale(0.9); /* Pressed effect */
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.6);
     }
   </style>
 </head>
 <body>
-  <div>
-    <h1>Panic button</h1>
-    <p id="location">Send help.</p>
-    <button onclick="sendPanicAlert()">Panic</button>
-    <div id="mapLink"></div>
-  </div>
+  <button onclick="sendPanicAlert()">Panic</button>
 </body>
 </html>
