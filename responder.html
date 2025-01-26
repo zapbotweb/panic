@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Coordinates and Open in Google Maps</title>
+    <script>
+        // Function to fetch the coordinates from the raw GitHub file and generate the Google Maps link
+        function fetchCoordinates() {
+            const githubUrl = 'https://raw.githubusercontent.com/zapbotweb/panic/main/latest';
+
+            fetch(githubUrl)
+                .then(response => response.text())
+                .then(data => {
+                    // Assuming the coordinates are in the format "latitude,longitude"
+                    const coords = data.trim().split(',');
+                    if (coords.length === 2) {
+                        const latitude = parseFloat(coords[0]);
+                        const longitude = parseFloat(coords[1]);
+
+                        // Generate Google Maps link
+                        const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                        
+                        // Display the link in the HTML
+                        document.getElementById('googleMapsLink').innerHTML = `<a href="${googleMapsLink}" target="_blank">Open Location in Google Maps</a>`;
+                    } else {
+                        document.getElementById('googleMapsLink').innerText = 'Invalid coordinates data';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching coordinates:', error);
+                    document.getElementById('googleMapsLink').innerText = 'Error fetching coordinates';
+                });
+        }
+
+        // Fetch coordinates when the page loads
+        window.onload = fetchCoordinates;
+    </script>
+</head>
+<body>
+    <h1>Latest Coordinates</h1>
+    <div id="googleMapsLink">
+        <!-- The Google Maps link will be inserted here -->
+    </div>
+</body>
+</html>
